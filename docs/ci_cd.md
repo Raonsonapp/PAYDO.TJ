@@ -106,3 +106,39 @@ GitHub-и худи шумо, бе интернет/Flutter-и ман.
 
 ❌ Ман (Claude, дар ин чат) ин файлҳоро санҷида/build карда наметавонам —
 натиҷаи воқеӣ танҳо дар таби Actions-и GitHub-и шумо намоён мешавад.
+
+## Firebase CLI (rules, indexes, functions)
+
+`build.yml`/`ci.yml` танҳо **Flutter app**-ро (APK/Web/iOS) build
+мекунанд — онҳо `firestore.rules`, `firestore.indexes.json` ё
+`functions/`-ро деплой НАМЕКУНАНД. Ин корҳо бо Firebase CLI дар
+маҳали худи шумо (ё workflow-и алоҳида, агар хоҳед):
+
+```bash
+firebase login
+firebase use <проекти-firebase-и-шумо>
+firebase deploy --only firestore:rules,firestore:indexes,storage
+firebase deploy --only functions   # ихтиёрӣ — ниг. docs/notifications.md
+```
+
+## Хатоҳои маъмул ва ислоҳашон
+
+### `flutter analyze` сурх мешавад бо садҳо "info" (require_trailing_commas)
+
+Агар дар натиҷаи CI даҳҳо/садҳо паёми `info • Missing a required
+trailing comma` бинед — ин **хатогии воқеӣ нест**, лоиҳа lint-и
+услубии `require_trailing_commas` дорад (`analysis_options.yaml`).
+Дуруст аст, ки CI дар ин ҳолат сабз бошад: `flutter analyze` (бе
+`--fatal-infos`) пешфарз танҳо дар сатҳи "error" ноком мешавад. Агар
+шумо худатон `--fatal-infos` илова кунед, CI бе сабаби воқеӣ сурх
+мешавад — инро дар ин лоиҳа қасдан накардем (ниг. эзоҳ дар
+`.github/workflows/ci.yml`).
+
+### `warning • The asset directory 'assets/images/' doesn't exist`
+
+`pubspec.yaml` папкаи `assets/images/`-ро эълон мекунад (барои
+тасвирҳои ояндаи статикӣ), вале Git папкаи холиро track намекунад —
+агар файл дар дохили он набошад, пас аз `git clone` папка вуҷуд
+надорад ва `flutter analyze` шикоят мекунад. Файли
+`assets/images/README.md` махсус барои ин гузошта шудааст (то Git
+папкаро нигоҳ дорад).

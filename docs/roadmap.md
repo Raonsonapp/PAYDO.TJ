@@ -18,9 +18,9 @@
 | 10 | Services | ✅ Анҷом ёфт | `lib/features/services/`, `lib/models/service_provider_model.dart`, `service_order_model.dart` |
 | 11 | Accounting / Дафтари ҳисоб | ✅ Анҷом ёфт | `lib/features/accounting/`, `lib/models/debt_model.dart`, `expense_model.dart` |
 | 12 | Delivery | ✅ Анҷом ёфт | `lib/features/delivery/`, `lib/models/courier_model.dart`, `delivery_model.dart` |
-| 13 | Map of Tajikistan | ⏳ | `lib/features/maps/` |
-| 14 | Live Delivery Tracking | ⏳ | `lib/features/delivery/`, `lib/features/maps/` |
-| 15 | Notifications | ⏳ | `lib/features/notifications/` |
+| 13 | Map of Tajikistan | ✅ Анҷом ёфт | `lib/features/maps/`, `docs/maps.md` |
+| 14 | Live Delivery Tracking | ✅ Анҷом ёфт | `lib/features/delivery/presentation/live_tracking_screen.dart`, `active_delivery_screen.dart` |
+| 15 | Notifications | ✅ Анҷом ёфт | `lib/features/notifications/`, `functions/`, `docs/notifications.md` |
 | 16 | Ratings / Reviews | ⏳ | `lib/features/reviews/` |
 | 17 | Search and filters | ⏳ | `lib/features/search/` |
 | 18 | Advertising / Premium | ⏳ | `lib/features/advertising/` |

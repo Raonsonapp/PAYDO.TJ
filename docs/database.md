@@ -137,6 +137,37 @@
 
 `DeliveryStatus` (assigned/pickedUp/onTheWay/delivered) аз `OrderStatus`-и marketplace (PHASE 7) ҷудост — якум марҳилаи логистикии ба courier вобаста, дуввум тамоми pipeline-и тиҷоратист. Composition байни ин ду (масалан "delivered" → order.status="completed") дар сатҳи Riverpod controller (`DeliveryActionController`) анҷом дода мешавад, на дар дохили худи repository-ҳо — ниг. `docs/architecture.md`.
 
+**PHASE 14 (Live Tracking)** ба `deliveries/{orderId}` ин майдонҳоро илова кард:
+
+| Майдон | Навъ | Тавзеҳ |
+|---|---|---|
+| `courierLocation` | geopoint? | GPS-и зиндаи courier; null то tracking фаъол шавад |
+| `courierLocationUpdatedAt` | timestamp? | |
+| `pickupCity` | string | шаҳри бизнеси seller-и таъинкунанда (fallback: customerCity) |
+| `pickupLocation` | geopoint? | аз `businesses.location`, агар бошад |
+
+Ягон қоидаи нави Security Rule лозим нашуд — майдонҳои нав тавассути ҳамон "update"-и мавҷуда (courierId==auth.uid) навсозӣ мешаванд.
+
+### PHASE 13 (Map)
+
+Ягон коллексияи нав сохта нашуд. Ниг. `docs/maps.md` барои тавзеҳи пурра
+— маркерҳо бевосита аз `businesses`/`services`/`jobs`/`couriers` хонда
+мешаванд.
+
+### `notifications/{id}` (PHASE 15)
+
+| Майдон | Навъ | Тавзеҳ |
+|---|---|---|
+| recipientId | string | |
+| type | string | newOrder/orderStatusChanged/newMessage/courierAssigned/deliveryStarted/deliveryArrived/jobApplication/newVacancy/review/system |
+| title, body | string | |
+| contextType, contextId | string? | 'order'/'chat'/'job'/'business' — барои навигатсия ҳангоми tap |
+| isRead | bool | |
+| createdAt | timestamp | |
+
+Push-и воқеӣ (FCM) тавассути Cloud Function-и `functions/index.js`
+фиристода мешавад — ниг. `docs/notifications.md`.
+
 ## Феҳристи коллексияҳои банақшагирифташуда (аз спецификация, банди 27)
 
 Ин рӯйхат дар `lib/core/constants/firestore_paths.dart` аллакай ҳамчун constant мавҷуд аст (то ном дар кодбоза дучандиягӣ надошта бошад), вале худи схема дар марҳилаи феҷаи дахлдор муайян карда мешавад:
@@ -144,7 +175,6 @@
 - `categories` — placeholder (ҳоло `ProductCategories` static, PHASE 19 динамикӣ мешавад)
 - `accounting` — истифода намешавад (dashboard бевосита аз orders/products ҳисоб мешавад, ниг. боло); `sales`, `inventory` низ сохта нашудаанд, ҳамон сабаб
 - `reviews` — PHASE 16
-- `notifications` — PHASE 15
 - `reports`, `advertisements` — PHASE 18/19
 - `cities` — PHASE 13 (ё static list, санҷиш дар PHASE 13)
 
