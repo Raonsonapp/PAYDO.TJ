@@ -30,6 +30,10 @@ class UserModel {
   final String? city;
   final List<AccountType> accountTypes;
 
+  /// PHASE 15: FCM device token — барои фиристодани push notification
+  /// ба ин корбар (тавассути Cloud Function, ниг. docs/notifications.md).
+  final String? fcmToken;
+
   /// Privacy: агар phone/age бояд пинҳон бошад.
   final bool phoneVisible;
   final bool ageVisible;
@@ -49,6 +53,7 @@ class UserModel {
     this.whatsapp,
     this.city,
     this.accountTypes = const [AccountType.user],
+    this.fcmToken,
     this.phoneVisible = false,
     this.ageVisible = false,
     this.createdAt,
@@ -88,6 +93,7 @@ class UserModel {
           .toList(),
       phoneVisible: map['phoneVisible'] as bool? ?? false,
       ageVisible: map['ageVisible'] as bool? ?? false,
+      fcmToken: map['fcmToken'] as String?,
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
       updatedAt: (map['updatedAt'] as Timestamp?)?.toDate(),
     );
@@ -108,6 +114,7 @@ class UserModel {
       'accountTypes': accountTypes.map((e) => e.value).toList(),
       'phoneVisible': phoneVisible,
       'ageVisible': ageVisible,
+      'fcmToken': fcmToken,
       if (isCreate) 'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };

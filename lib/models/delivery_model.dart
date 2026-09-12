@@ -51,7 +51,24 @@ class DeliveryModel {
   final String customerName;
   final String customerAddress;
   final String customerCity;
+
+  /// Нуқтаи гирифтани бор (banди 18: "🏪 Store" дар диаграмма). Аз
+  /// профили бизнеси seller-и таъинкунанда гирифта мешавад (агар
+  /// бошад); fallback ба `customerCity` агар seller бизнес надошта
+  /// бошад (ниг. `DeliveryActionController.assignCourier`).
+  final String pickupCity;
+  final GeoPoint? pickupLocation;
+
   final DeliveryStatus status;
+
+  /// Ҷои зиндаи courier (banди 18: Live Delivery Tracking). Танҳо
+  /// вақте courier худаш GPS-ро фаъол мекунад (тугмаи равшан дар UI —
+  /// "бе иҷозат маълумоти ҷой ҷамъ намекунем", ниг. banди 18) навсозӣ
+  /// мешавад. null маънои онро дорад, ки courier ҳанӯз tracking-ро
+  /// фаъол накардааст.
+  final GeoPoint? courierLocation;
+  final DateTime? courierLocationUpdatedAt;
+
   final DateTime? assignedAt;
   final DateTime? updatedAt;
 
@@ -64,7 +81,11 @@ class DeliveryModel {
     required this.customerName,
     required this.customerAddress,
     required this.customerCity,
+    required this.pickupCity,
+    this.pickupLocation,
     this.status = DeliveryStatus.assigned,
+    this.courierLocation,
+    this.courierLocationUpdatedAt,
     this.assignedAt,
     this.updatedAt,
   });
@@ -79,7 +100,12 @@ class DeliveryModel {
       customerName: map['customerName'] as String? ?? '',
       customerAddress: map['customerAddress'] as String? ?? '',
       customerCity: map['customerCity'] as String? ?? '',
+      pickupCity: map['pickupCity'] as String? ?? (map['customerCity'] as String? ?? ''),
+      pickupLocation: map['pickupLocation'] as GeoPoint?,
       status: DeliveryStatusX.fromString(map['status'] as String? ?? 'assigned'),
+      courierLocation: map['courierLocation'] as GeoPoint?,
+      courierLocationUpdatedAt:
+          (map['courierLocationUpdatedAt'] as Timestamp?)?.toDate(),
       assignedAt: (map['assignedAt'] as Timestamp?)?.toDate(),
       updatedAt: (map['updatedAt'] as Timestamp?)?.toDate(),
     );
@@ -94,7 +120,10 @@ class DeliveryModel {
       'customerName': customerName,
       'customerAddress': customerAddress,
       'customerCity': customerCity,
+      'pickupCity': pickupCity,
+      'pickupLocation': pickupLocation,
       'status': status.value,
+      'courierLocation': courierLocation,
       if (isCreate) 'assignedAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
