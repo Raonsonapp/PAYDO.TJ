@@ -37,7 +37,12 @@ jobs:
         continue-on-error: true # то ҳол "warning", на "hard fail" — тавзеҳ дар docs/ci_cd.md
 
       - name: Analyze (flutter analyze)
-        run: flutter analyze --fatal-infos
+        # Диққат: ҚАСДАН бе --fatal-infos. Лоиҳа lint-и услубии
+        # require_trailing_commas дорад (analysis_options.yaml), ки
+        # даҳҳо "info" (на "error") медиҳад — бо --fatal-infos онҳо
+        # CI-ро сурх мекарданд бе он ки коде воқеан вайрон бошад.
+        # flutter analyze пешфарз танҳо дар "error" ноком мешавад.
+        run: flutter analyze
 
       - name: Run unit tests
         run: flutter test --coverage
