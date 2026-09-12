@@ -21,7 +21,10 @@ Super App / marketplace-и бисёрфунксионалӣ барои Тоҷи�
 | 10 | Services | ✅ Анҷом ёфт |
 | 11 | Accounting / Дафтари ҳисоб | ✅ Анҷом ёфт |
 | 12 | Delivery | ✅ Анҷом ёфт |
-| 13–25 | ... | ⏳ Дар навбат |
+| 13 | Map of Tajikistan | ✅ Анҷом ёфт |
+| 14 | Live Delivery Tracking | ✅ Анҷом ёфт |
+| 15 | Notifications | ✅ Анҷом ёфт |
+| 16–25 | ... | ⏳ Дар навбат |
 
 Ниг. [`docs/roadmap.md`](docs/roadmap.md) барои феҳристи пурраи марҳилаҳо.
 
@@ -62,6 +65,8 @@ lib/
 Иконкаи барнома (APK/iOS/Web) аз `assets/icons/app_icon.png` (лого-и PAYDO.TJ) худкор бо `flutter_launcher_icons` сохта мешавад.
 
 **Қадами якум пеш аз build:** 2 GitHub Secret (Firebase config) танзим кунед — дастури пурра дар [`docs/ci_cd.md`](docs/ci_cd.md).
+
+**PHASE 15 (Notifications):** барои push-и воқеӣ (на танҳо in-app), Cloud Function-и `functions/` бояд деплой шавад — ихтиёрӣ, дастур дар [`docs/notifications.md`](docs/notifications.md).
 
 ## Роҳандозии лоиҳа дар маҳали худ
 
