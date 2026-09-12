@@ -14,6 +14,7 @@ class FirestorePaths {
   static const messages = 'messages';
   static const jobs = 'jobs';
   static const jobApplications = 'job_applications';
+  static const workerProfiles = 'worker_profiles';
   static const services = 'services';
   static const serviceOrders = 'service_orders';
   static const accounting = 'accounting';
