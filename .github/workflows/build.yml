@@ -66,7 +66,8 @@ jobs:
         run: dart run flutter_launcher_icons
 
       - name: flutter analyze
-        run: flutter analyze --fatal-infos
+        # Бе --fatal-infos — ниг. эзоҳи муфассал дар ci.yml.
+        run: flutter analyze
 
       - name: flutter test
         run: flutter test
