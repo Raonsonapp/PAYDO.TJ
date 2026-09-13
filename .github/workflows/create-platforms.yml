@@ -1,10 +1,13 @@
-name: PAYDO TJ - Create Platforms
+name: PAYDO TJ — Create Platforms
 
 on:
   workflow_dispatch:
   push:
     branches:
       - main
+
+permissions:
+  contents: write
 
 jobs:
   create-platforms:
@@ -34,12 +37,7 @@ jobs:
 
       - name: Remove incomplete platform folders
         run: |
-          rm -rf android
-          rm -rf ios
-          rm -rf windows
-          rm -rf macos
-          rm -rf linux
-          rm -rf web
+          rm -rf android ios windows macos linux web
 
       - name: Generate all Flutter platforms
         run: |
@@ -49,22 +47,24 @@ jobs:
             --project-name=paydo_tj
 
       - name: Restore dependencies
-        run: |
-          flutter pub get
+        run: flutter pub get
 
       - name: Verify generated platforms
         run: |
-          echo "Checking generated platform folders..."
-
-          test -d android && echo "ANDROID: OK"
-          test -d ios && echo "iOS: OK"
-          test -d windows && echo "WINDOWS: OK"
-          test -d macos && echo "macOS: OK"
-          test -d linux && echo "LINUX: OK"
-          test -d web && echo "WEB: OK"
+          set -e
+          test -d android
+          test -d ios
+          test -d windows
+          test -d macos
+          test -d linux
+          test -d web
+          echo "All Flutter platform folders are OK."
 
       - name: Commit generated platforms
+        shell: bash
         run: |
+          set -euo pipefail
+
           git config user.name "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
@@ -72,7 +72,8 @@ jobs:
 
           if git diff --cached --quiet; then
             echo "No platform changes."
-          else
-            git commit -m "Generate Flutter platform files"
-            git push
+            exit 0
           fi
+
+          git commit -m "Generate Flutter platform files"
+          git push
