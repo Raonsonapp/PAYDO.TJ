@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/constants/app_strings.dart';
 import 'core/theme/app_theme.dart';
-import 'routing/app_router.dart';
+import 'features/home/presentation/root_shell.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,15 +20,16 @@ class PaydoApp extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final router = ref.watch(routerProvider);
-
-    return MaterialApp.router(
+    return MaterialApp(
       title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
+
+      // PAYDO TJ ҳоло theme-и худро истифода мебарад.
+      // Аз Dark/Light Mode-и телефон пайравӣ намекунад.
       theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
-      routerConfig: router,
+      themeMode: ThemeMode.light,
+
+      home: const RootShell(),
     );
   }
 }
