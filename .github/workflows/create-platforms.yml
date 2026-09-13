@@ -1,0 +1,78 @@
+name: PAYDO TJ - Create Platforms
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  create-platforms:
+    name: Generate Flutter Platform Files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+
+      - name: Check Flutter
+        run: |
+          flutter --version
+          flutter doctor
+
+      - name: Remove incomplete platform folders
+        run: |
+          rm -rf android
+          rm -rf ios
+          rm -rf windows
+          rm -rf macos
+          rm -rf linux
+          rm -rf web
+
+      - name: Generate all Flutter platforms
+        run: |
+          flutter create . \
+            --platforms=android,ios,windows,macos,linux,web \
+            --org=tj.paydo \
+            --project-name=paydo_tj
+
+      - name: Restore dependencies
+        run: |
+          flutter pub get
+
+      - name: Verify generated platforms
+        run: |
+          echo "Checking generated platform folders..."
+
+          test -d android && echo "ANDROID: OK"
+          test -d ios && echo "iOS: OK"
+          test -d windows && echo "WINDOWS: OK"
+          test -d macos && echo "macOS: OK"
+          test -d linux && echo "LINUX: OK"
+          test -d web && echo "WEB: OK"
+
+      - name: Commit generated platforms
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          git add android ios windows macos linux web
+
+          if git diff --cached --quiet; then
+            echo "No platform changes."
+          else
+            git commit -m "Generate Flutter platform files"
+            git push
+          fi
