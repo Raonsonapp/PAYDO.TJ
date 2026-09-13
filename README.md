@@ -24,7 +24,8 @@ Super App / marketplace-и бисёрфунксионалӣ барои Тоҷи�
 | 13 | Map of Tajikistan | ✅ Анҷом ёфт |
 | 14 | Live Delivery Tracking | ✅ Анҷом ёфт |
 | 15 | Notifications | ✅ Анҷом ёфт |
-| 16–25 | ... | ⏳ Дар навбат |
+| 16 | Ratings / Reviews | ✅ Анҷом ёфт |
+| 17–25 | ... | ⏳ Дар навбат |
 
 Ниг. [`docs/roadmap.md`](docs/roadmap.md) барои феҳристи пурраи марҳилаҳо.
 
@@ -67,6 +68,8 @@ lib/
 **Қадами якум пеш аз build:** 2 GitHub Secret (Firebase config) танзим кунед — дастури пурра дар [`docs/ci_cd.md`](docs/ci_cd.md).
 
 **PHASE 15 (Notifications):** барои push-и воқеӣ (на танҳо in-app), Cloud Function-и `functions/` бояд деплой шавад — ихтиёрӣ, дастур дар [`docs/notifications.md`](docs/notifications.md).
+
+**PHASE 16 (Reviews):** ҳисоби rating низ тавассути ҳамон Cloud Function-и `functions/` анҷом мешавад (амниятӣ — ниг. [`docs/reviews.md`](docs/reviews.md)). Агар шумо functions-ро деплой накунед, баҳо сабт мешавад, вале rating-и намоён навсозӣ намешавад.
 
 ## Роҳандозии лоиҳа дар маҳали худ
 

@@ -28,7 +28,7 @@ dependencies:
   google_sign_in: ^6.2.1
 
   # ---- Maps (free/open-source: MapLibre + OSM) ----
-  maplibre_gl: ^0.27.0
+  maplibre_gl: ^0.20.0
 
   # ---- Utilities ----
   cupertino_icons: ^1.0.8

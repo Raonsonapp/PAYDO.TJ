@@ -27,6 +27,10 @@ service cloud.firestore {
       allow read: if true;
       allow create: if request.auth != null
                     && request.resource.data.sellerId == request.auth.uid;
+      // PHASE 16: rating/reviewsCount танҳо аз Cloud Function
+      // (Admin SDK, functions/index.js) навсозӣ мешаванд — на бевосита
+      // аз client. Ин пешгирии дасткории rating бе баҳои воқеӣ мекунад
+      // (ниг. docs/reviews.md барои сабаби тарроҳӣ).
       allow update, delete: if request.auth != null
                     && resource.data.sellerId == request.auth.uid;
     }
@@ -216,6 +220,21 @@ service cloud.firestore {
                           && resource.data.recipientId == request.auth.uid;
       allow create: if request.auth != null;
       allow delete: if false;
+    }
+
+    // Баҳо/шарҳ (PHASE 16): docId детерминистӣ
+    // (`{contextId}_{targetType}_{targetId}`) — пешгирии баҳои такрорӣ.
+    // Хондан кушода (баҳо бояд ҷамъиятӣ намоён бошад). Сохтан танҳо аз
+    // номи худи муаллиф. Тағйир/нест кардан бастаанд — баҳо баъд аз
+    // фиристодан ивазнашаванда аст (мисли паёмҳои чат).
+    // rating/reviewsCount-и target ИН ҶО навсозӣ НАМЕШАВАД — он
+    // вазифаи Cloud Function-и `recalculateRatingOnReviewCreated`
+    // (functions/index.js, Admin SDK) аст, ниг. docs/reviews.md.
+    match /reviews/{reviewId} {
+      allow read: if request.auth != null;
+      allow create: if request.auth != null
+                    && request.resource.data.authorId == request.auth.uid;
+      allow update, delete: if false;
     }
 
     // Ҳама коллексияҳои дигар то муайян шуданашон дар марҳилаҳои
