@@ -31,6 +31,12 @@ class CourierModel {
   final String? vehicleType; // масалан марка/рақами мошин
   final GeoPoint? location;
   final CourierStatus status;
+
+  /// PHASE 16: баҳо (мисли products/businesses/services — навсозӣ
+  /// мешавад аз ReviewRepository ҳангоми баҳои нав).
+  final double rating;
+  final int reviewsCount;
+
   final DateTime? createdAt;
   final DateTime? updatedAt;
 
@@ -42,6 +48,8 @@ class CourierModel {
     this.vehicleType,
     this.location,
     this.status = CourierStatus.offline,
+    this.rating = 0,
+    this.reviewsCount = 0,
     this.createdAt,
     this.updatedAt,
   });
@@ -55,6 +63,8 @@ class CourierModel {
       vehicleType: map['vehicleType'] as String?,
       location: map['location'] as GeoPoint?,
       status: CourierStatusX.fromString(map['status'] as String? ?? 'offline'),
+      rating: (map['rating'] as num?)?.toDouble() ?? 0,
+      reviewsCount: map['reviewsCount'] as int? ?? 0,
       createdAt: (map['createdAt'] as Timestamp?)?.toDate(),
       updatedAt: (map['updatedAt'] as Timestamp?)?.toDate(),
     );
@@ -69,6 +79,8 @@ class CourierModel {
       'vehicleType': vehicleType,
       'location': location,
       'status': status.value,
+      'rating': rating,
+      'reviewsCount': reviewsCount,
       if (isCreate) 'createdAt': FieldValue.serverTimestamp(),
       'updatedAt': FieldValue.serverTimestamp(),
     };
