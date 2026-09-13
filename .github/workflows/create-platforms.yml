@@ -2,12 +2,10 @@ name: PAYDO TJ — Create Platforms
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 permissions:
   contents: write
+  pull-requests: write
 
 jobs:
   create-platforms:
@@ -17,12 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-
-      - name: Setup Java
-        uses: actions/setup-java@v4
         with:
-          distribution: temurin
-          java-version: "17"
+          fetch-depth: 0
 
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
@@ -30,50 +24,42 @@ jobs:
           channel: stable
           cache: true
 
-      - name: Check Flutter
-        run: |
-          flutter --version
-          flutter doctor
-
-      - name: Remove incomplete platform folders
-        run: |
-          rm -rf android ios windows macos linux web
-
-      - name: Generate all Flutter platforms
-        run: |
-          flutter create . \
-            --platforms=android,ios,windows,macos,linux,web \
-            --org=tj.paydo \
-            --project-name=paydo_tj
-
-      - name: Restore dependencies
-        run: flutter pub get
-
-      - name: Verify generated platforms
-        run: |
-          set -e
-          test -d android
-          test -d ios
-          test -d windows
-          test -d macos
-          test -d linux
-          test -d web
-          echo "All Flutter platform folders are OK."
-
-      - name: Commit generated platforms
+      - name: Generate all platform folders
         shell: bash
         run: |
           set -euo pipefail
+          rm -rf android ios web windows macos linux
+          flutter create . \
+            --platforms=android,ios,web,windows,macos,linux \
+            --org=tj.paydo \
+            --project-name=paydo_tj
+          flutter pub get
 
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      - name: Verify platform folders
+        shell: bash
+        run: |
+          set -euo pipefail
+          for dir in android ios web windows macos linux; do
+            test -d "$dir"
+            echo "OK: $dir"
+          done
 
-          git add android ios windows macos linux web
-
-          if git diff --cached --quiet; then
-            echo "No platform changes."
-            exit 0
-          fi
-
-          git commit -m "Generate Flutter platform files"
-          git push
+      - name: Create platform update pull request
+        uses: peter-evans/create-pull-request@v7
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: automation/generate-flutter-platforms
+          delete-branch: true
+          base: main
+          title: "Generate Flutter platform files"
+          commit-message: "Generate Flutter platform files"
+          body: |
+            Automatically generated Flutter platform folders:
+            android, ios, web, windows, macos, linux.
+          add-paths: |
+            android/
+            ios/
+            web/
+            windows/
+            macos/
+            linux/
