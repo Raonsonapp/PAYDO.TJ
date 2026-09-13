@@ -5,7 +5,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../maps/presentation/map_placeholder_screen.dart';
 import '../../profile/presentation/profile_screen.dart';
 import '../../search/presentation/search_screen.dart';
-import 'add_options_sheet.dart';
+import 'add_options_sheets.dart';
 import 'home_tab_screen.dart';
 
 /// Bottom navigation-и асосии PAYDO.TJ (banди 7 спецификатсия):
