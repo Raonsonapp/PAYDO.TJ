@@ -25,7 +25,8 @@ Super App / marketplace-и бисёрфунксионалӣ барои Тоҷи�
 | 14 | Live Delivery Tracking | ✅ Анҷом ёфт |
 | 15 | Notifications | ✅ Анҷом ёфт |
 | 16 | Ratings / Reviews | ✅ Анҷом ёфт |
-| 17–25 | ... | ⏳ Дар навбат |
+| 17 | Search and filters | ✅ Анҷом ёфт |
+| 18–25 | ... | ⏳ Дар навбат |
 
 Ниг. [`docs/roadmap.md`](docs/roadmap.md) барои феҳристи пурраи марҳилаҳо.
 
