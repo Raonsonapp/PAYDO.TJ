@@ -168,13 +168,28 @@
 Push-и воқеӣ (FCM) тавассути Cloud Function-и `functions/index.js`
 фиристода мешавад — ниг. `docs/notifications.md`.
 
+### `reviews/{contextId}_{targetType}_{targetId}` (PHASE 16)
+
+| Майдон | Навъ | Тавзеҳ |
+|---|---|---|
+| authorId, authorName | string | |
+| targetType | string | product/business/serviceProvider/courier |
+| targetId | string | productId/businessId(=ownerId)/providerId(uid)/courierId(uid) |
+| contextId | string | orderId ё serviceOrderId-и анҷомёфта (барои пешгирии такрор) |
+| rating | int | 1-5 |
+| text | string | ихтиёрӣ |
+| createdAt | timestamp | |
+
+`rating`/`reviewsCount`-и худи target (масалан `products/{id}.rating`)
+тавассути Cloud Function навсозӣ мешавад, НА бевосита аз ин навиштан —
+ниг. `docs/reviews.md` барои сабаби амниятӣ.
+
 ## Феҳристи коллексияҳои банақшагирифташуда (аз спецификация, банди 27)
 
 Ин рӯйхат дар `lib/core/constants/firestore_paths.dart` аллакай ҳамчун constant мавҷуд аст (то ном дар кодбоза дучандиягӣ надошта бошад), вале худи схема дар марҳилаи феҷаи дахлдор муайян карда мешавад:
 
 - `categories` — placeholder (ҳоло `ProductCategories` static, PHASE 19 динамикӣ мешавад)
 - `accounting` — истифода намешавад (dashboard бевосита аз orders/products ҳисоб мешавад, ниг. боло); `sales`, `inventory` низ сохта нашудаанд, ҳамон сабаб
-- `reviews` — PHASE 16
 - `reports`, `advertisements` — PHASE 18/19
 - `cities` — PHASE 13 (ё static list, санҷиш дар PHASE 13)
 

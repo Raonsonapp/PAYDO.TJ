@@ -49,6 +49,10 @@ features/<name>/
 
 **Notifications (PHASE 15):** Ду қабат — (1) in-app notification center (`notifications` коллексия, Firestore listener, кор мекунад бе танзими иловагӣ), (2) push-и воқеии FCM (ба Cloud Function ниёз дорад, зеро client SDK наметавонад ба корбари дигар push фиристад — маҳдудияти амниятии худи Firebase). Cloud Function (`functions/index.js`) хурд ва як-масъулиятӣ аст: Firestore trigger → FCM send, деплойи он ихтиёрист. Notification-creation дар сатҳи presentation controller-ҳои феҳаҳои аллакай мавҷуда (checkout, seller orders, chat, vacancy apply, delivery actions) илова карда шуд — на дар repository-ҳо, ҳамон принсипи "composition дар controller" аз PHASE 12. Тавзеҳи пурра: `docs/notifications.md`.
 
+**Reviews (PHASE 16):** docId детерминистӣ (`{contextId}_{targetType}_{targetId}`) — ҳамон мантиқи favorites/chats/job_applications/deliveries барои пешгирии баҳои такрорӣ. Ҳисоби миёнаи rating **дар Cloud Function** (Admin SDK), НА дар client — сабаб: агар client-ро иҷозат медодем rating-ро бевосита нависад, Security Rules наметавонистанд санҷанд "ин навсозӣ воқеан аз баҳои воқеӣ меояд", ва ягон корбар метавонист rating-ро дасткорӣ кунад. Ин ҳамон намуди "Cloud Function ҳамчун пули боэътимод" аст, ки дар PHASE 15 барои push истифода шуд. Тавзеҳи пурра: `docs/reviews.md`.
+
+**Search (PHASE 17):** Firestore full-text/fuzzy search надорад — истифода шуд **prefix-search** (`nameLower`/`titleLower`, майдони худкор дар `toMap()`, бе тағйири UI-и форма-ҳо). Ин "scalable" аст (индекси воқеӣ), вале маҳдуд (танҳо аз аввали калима). Хизмати fuzzy-и алоҳида (Algolia/Meilisearch) қасдан берун аз доираи free-tier монд — тавзеҳи пурра ва сабаб дар `docs/search.md`. Filter-ҳои city/category тавассути Firestore `where()`, price/rating/delivery дар client (Firestore range-filter-и якчанд майдони ҳамзамонро маҳдуд мекунад).
+
 ## Firebase
 
 - **Authentication:** Google Sign-In танҳо (PHASE 1). Дигар усулҳо (телефон, email/parol) дар спецификация зикр нашудаанд — илова намешаванд, то аз spec берун набароем.

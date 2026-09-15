@@ -21,8 +21,8 @@
 | 13 | Map of Tajikistan | ✅ Анҷом ёфт | `lib/features/maps/`, `docs/maps.md` |
 | 14 | Live Delivery Tracking | ✅ Анҷом ёфт | `lib/features/delivery/presentation/live_tracking_screen.dart`, `active_delivery_screen.dart` |
 | 15 | Notifications | ✅ Анҷом ёфт | `lib/features/notifications/`, `functions/`, `docs/notifications.md` |
-| 16 | Ratings / Reviews | ⏳ | `lib/features/reviews/` |
-| 17 | Search and filters | ⏳ | `lib/features/search/` |
+| 16 | Ratings / Reviews | ✅ Анҷом ёфт | `lib/features/reviews/`, `functions/index.js`, `docs/reviews.md` |
+| 17 | Search and filters | ✅ Анҷом ёфт | `lib/features/search/`, `docs/search.md` |
 | 18 | Advertising / Premium | ⏳ | `lib/features/advertising/` |
 | 19 | Admin Panel | ⏳ | (феҷаи нав дар оянда) |
 | 20 | Security | ⏳ | `firestore.rules` (пурра) |
