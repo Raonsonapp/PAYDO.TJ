@@ -1,4 +1,4 @@
-'21name: Build — Android / Web / iOS
+name: Build — Android / Web / iOS
 
 # Ин workflow-ро дастӣ аз таби "Actions" → "Build — Android / Web / iOS" →
 # "Run workflow" оғоз кунед, ё бо push кардани tag-и "v*" (масалан v0.1.0).
