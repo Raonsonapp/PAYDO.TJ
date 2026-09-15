@@ -88,6 +88,7 @@ class ProductModel {
       'sellerId': sellerId,
       'businessId': businessId,
       'name': name,
+      'nameLower': name.toLowerCase(), // PHASE 17: prefix-search (Firestore)
       'description': description,
       'price': price,
       'purchasePrice': purchasePrice,

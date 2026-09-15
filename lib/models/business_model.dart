@@ -72,6 +72,7 @@ class BusinessModel {
     return {
       'ownerId': ownerId,
       'businessName': businessName,
+      'nameLower': businessName.toLowerCase(), // PHASE 17: prefix-search
       'logoUrl': logoUrl,
       'coverImageUrl': coverImageUrl,
       'description': description,

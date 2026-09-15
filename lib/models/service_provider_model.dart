@@ -65,6 +65,7 @@ class ServiceProviderModel {
     return {
       'uid': uid,
       'name': name,
+      'nameLower': name.toLowerCase(), // PHASE 17: prefix-search
       'photoUrl': photoUrl,
       'serviceCategory': serviceCategory,
       'description': description,

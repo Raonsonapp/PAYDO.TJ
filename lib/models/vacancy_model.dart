@@ -85,6 +85,7 @@ class VacancyModel {
       'employerId': employerId,
       'employerName': employerName,
       'title': title,
+      'titleLower': title.toLowerCase(), // PHASE 17: prefix-search
       'description': description,
       'salaryMin': salaryMin,
       'salaryMax': salaryMax,
