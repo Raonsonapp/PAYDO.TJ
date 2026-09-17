@@ -18,36 +18,124 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Flutter
+      - name: Setup Flutter 3.27.0
         uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.0'
           cache: true
 
-      - name: Setup Java
+      - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
 
       - name: Recreate Android project
+        shell: bash
         run: |
+          set -euo pipefail
+
           rm -rf android
+
           flutter create . \
             --platforms=android \
             --org=tj.paydo \
             --project-name=paydo_tj
 
-      - name: Get dependencies
+      - name: Configure Android Gradle
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+
+          # -----------------------------
+          # settings.gradle.kts
+          # -----------------------------
+          settings = Path("android/settings.gradle.kts")
+
+          text = settings.read_text()
+
+          text = re.sub(
+              r'id\("com\.android\.application"\)\s+version\s+"[^"]+"\s+apply false',
+              'id("com.android.application") version "8.7.3" apply false',
+              text,
+          )
+
+          text = re.sub(
+              r'id\("org\.jetbrains\.kotlin\.android"\)\s+version\s+"[^"]+"\s+apply false',
+              'id("org.jetbrains.kotlin.android") version "1.9.24" apply false',
+              text,
+          )
+
+          settings.write_text(text)
+
+          # -----------------------------
+          # app/build.gradle.kts
+          # -----------------------------
+          app = Path("android/app/build.gradle.kts")
+
+          text = app.read_text()
+
+          text = text.replace(
+              "JavaVersion.VERSION_17",
+              "JavaVersion.VERSION_21",
+          )
+
+          text = text.replace(
+              "JvmTarget.JVM_17",
+              "JvmTarget.JVM_21",
+          )
+
+          app.write_text(text)
+
+          # -----------------------------
+          # Application label
+          # -----------------------------
+          manifest = Path(
+              "android/app/src/main/AndroidManifest.xml"
+          )
+
+          text = manifest.read_text()
+
+          text = re.sub(
+              r'android:label="[^"]*"',
+              'android:label="PAYDO TJ"',
+              text,
+              count=1,
+          )
+
+          manifest.write_text(text)
+          PY
+
+      - name: Show Android versions
+        shell: bash
+        run: |
+          echo "===== settings.gradle.kts ====="
+          cat android/settings.gradle.kts
+
+          echo "===== app/build.gradle.kts ====="
+          cat android/app/build.gradle.kts
+
+          echo "===== Gradle version ====="
+          cd android
+          ./gradlew --version
+
+      - name: Flutter Pub Get
         run: flutter pub get
 
-      - name: Clean
+      - name: Generate launcher icons
+        run: dart run flutter_launcher_icons
+
+      - name: Flutter Clean
         run: flutter clean
 
-      - name: Get dependencies again
+      - name: Flutter Pub Get Again
         run: flutter pub get
 
-      - name: Build APK
+      - name: Build Release APK
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
