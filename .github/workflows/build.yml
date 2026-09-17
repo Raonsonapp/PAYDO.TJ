@@ -51,77 +51,160 @@ jobs:
           from pathlib import Path
           import re
 
-          # -----------------------------
-          # settings.gradle.kts
-          # -----------------------------
-          settings = Path("android/settings.gradle.kts")
+          # ============================================================
+          # SETTINGS FILE
+          # Flutter 3.27 uses settings.gradle (Groovy).
+          # Support settings.gradle.kts too, just in case.
+          # ============================================================
+
+          settings_files = [
+              Path("android/settings.gradle"),
+              Path("android/settings.gradle.kts"),
+          ]
+
+          settings = next(
+              (p for p in settings_files if p.exists()),
+              None,
+          )
+
+          if settings is None:
+              raise FileNotFoundError(
+                  "Android settings.gradle / settings.gradle.kts not found"
+              )
 
           text = settings.read_text()
 
+          # Android Gradle Plugin
           text = re.sub(
-              r'id\("com\.android\.application"\)\s+version\s+"[^"]+"\s+apply false',
-              'id("com.android.application") version "8.7.3" apply false',
+              r'(id\s*[("]\s*com\.android\.application\s*[")]\s*version\s*[")])[^"]+([")]\s*apply\s+false)',
+              r'\g<1>8.7.3\g<2>',
               text,
           )
 
+          # Kotlin plugin
           text = re.sub(
-              r'id\("org\.jetbrains\.kotlin\.android"\)\s+version\s+"[^"]+"\s+apply false',
-              'id("org.jetbrains.kotlin.android") version "1.9.24" apply false',
+              r'(id\s*[("]\s*org\.jetbrains\.kotlin\.android\s*[")]\s*version\s*[")])[^"]+([")]\s*apply\s+false)',
+              r'\g<1>1.9.24\g<2>',
               text,
           )
 
           settings.write_text(text)
 
-          # -----------------------------
-          # app/build.gradle.kts
-          # -----------------------------
-          app = Path("android/app/build.gradle.kts")
+          print(f"Configured: {settings}")
+
+          # ============================================================
+          # APP BUILD FILE
+          # Support BOTH Groovy and Kotlin DSL.
+          # ============================================================
+
+          app_files = [
+              Path("android/app/build.gradle"),
+              Path("android/app/build.gradle.kts"),
+          ]
+
+          app = next(
+              (p for p in app_files if p.exists()),
+              None,
+          )
+
+          if app is None:
+              raise FileNotFoundError(
+                  "android/app/build.gradle / build.gradle.kts not found"
+              )
 
           text = app.read_text()
 
+          # Java 21
           text = text.replace(
               "JavaVersion.VERSION_17",
               "JavaVersion.VERSION_21",
           )
 
           text = text.replace(
+              "JavaVersion.VERSION_11",
+              "JavaVersion.VERSION_21",
+          )
+
+          # Kotlin JVM 21, when Kotlin DSL is used
+          text = text.replace(
               "JvmTarget.JVM_17",
               "JvmTarget.JVM_21",
           )
 
+          text = text.replace(
+              "JvmTarget.JVM_11",
+              "JvmTarget.JVM_21",
+          )
+
+          # Kotlin compiler target, when Groovy DSL is used
+          text = text.replace(
+              "jvmTarget = '17'",
+              "jvmTarget = '21'",
+          )
+
+          text = text.replace(
+              'jvmTarget = "17"',
+              'jvmTarget = "21"',
+          )
+
+          text = text.replace(
+              "jvmTarget = '11'",
+              "jvmTarget = '21'",
+          )
+
+          text = text.replace(
+              'jvmTarget = "11"',
+              'jvmTarget = "21"',
+          )
+
           app.write_text(text)
 
-          # -----------------------------
-          # Application label
-          # -----------------------------
+          print(f"Configured: {app}")
+
+          # ============================================================
+          # APP NAME
+          # ============================================================
+
           manifest = Path(
               "android/app/src/main/AndroidManifest.xml"
           )
 
-          text = manifest.read_text()
+          if manifest.exists():
+              text = manifest.read_text()
 
-          text = re.sub(
-              r'android:label="[^"]*"',
-              'android:label="PAYDO TJ"',
-              text,
-              count=1,
-          )
+              text = re.sub(
+                  r'android:label="[^"]*"',
+                  'android:label="PAYDO TJ"',
+                  text,
+                  count=1,
+              )
 
-          manifest.write_text(text)
+              manifest.write_text(text)
+
+          print("Android configuration complete.")
           PY
 
-      - name: Show Android versions
+      - name: Show Android files
         shell: bash
         run: |
-          echo "===== settings.gradle.kts ====="
-          cat android/settings.gradle.kts
+          echo "===== Android structure ====="
+          find android -maxdepth 3 -type f | sort | head -200
 
-          echo "===== app/build.gradle.kts ====="
-          cat android/app/build.gradle.kts
+          echo "===== Settings ====="
 
-          echo "===== Gradle version ====="
-          cd android
-          ./gradlew --version
+          if [ -f android/settings.gradle ]; then
+            cat android/settings.gradle
+          elif [ -f android/settings.gradle.kts ]; then
+            cat android/settings.gradle.kts
+          fi
+
+          echo "===== App Gradle ====="
+
+          if [ -f android/app/build.gradle ]; then
+            cat android/app/build.gradle
+          elif [ -f android/app/build.gradle.kts ]; then
+            cat android/app/build.gradle.kts
+          fi
 
       - name: Flutter Pub Get
         run: flutter pub get
