@@ -1,15 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_riverpod/flutter_riverpod.dart';
-
 import '../../../core/constants/app_strings.dart';
 import '../../../core/theme/app_colors.dart';
-import '../../auth/presentation/auth_providers.dart';
 import '../domain/home_category.dart';
 
 /// Home tab-и асосӣ. Ин феҳристи виҷетҳои дигар (RootShell)-ро надорад —
 /// он худ як "tab body" аст, на Scaffold-и мустақил, то бо
 /// BottomNavigationBar-и RootShell дуруст кор кунад.
-class HomeTabScreen extends ConsumerWidget {
+class HomeTabScreen extends StatelessWidget {
   final VoidCallback? onSearchTap;
   final ValueChanged<String>? onCategoryTap;
 
@@ -20,9 +17,8 @@ class HomeTabScreen extends ConsumerWidget {
   });
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final authState = ref.watch(authStateProvider);
-    final userName = authState.value?.name.split(' ').first ?? '';
+  Widget build(BuildContext context) {
+    const userName = '';
 
     return Scaffold(
       appBar: AppBar(
