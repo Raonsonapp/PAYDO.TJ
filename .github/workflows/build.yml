@@ -1,4 +1,4 @@
-name: PAYDO TJ — Android APK (offline UI)
+name: PAYDO TJ Android APK
 
 on:
   workflow_dispatch:
@@ -10,72 +10,51 @@ permissions:
   contents: read
 
 jobs:
-  build-android:
-    name: Build PAYDO TJ APK
+  build:
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      # Flutter 3.27.0 is kept deliberately for the current maplibre_gl 0.20.0.
-      - name: Setup Flutter 3.27.0
+      - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: 3.27.0
           cache: true
 
-      # maplibre_gl 0.20.0's Android toolchain needs JDK 21.
-      - name: Setup Java 21
+      - name: Setup Java
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: 21
 
-      - name: Generate Android platform with pinned Flutter
-        shell: bash
+      - name: Recreate Android project
         run: |
-          set -euo pipefail
           rm -rf android
-          flutter create . \
-            --platforms=android \
-            --org=tj.paydo \
-            --project-name=paydo_tj
+          flutter create . --platforms=android --org=tj.paydo --project-name=paydo_tj
 
-      - name: Set Android application label
-        shell: bash
+      - name: Set Java compatibility
         run: |
-          set -euo pipefail
-          MANIFEST="android/app/src/main/AndroidManifest.xml"
-          sed -i 's/android:label="[^\"]*"/android:label="PAYDO TJ"/' "$MANIFEST"
-
-      - name: Set Java 21 compatibility
-        shell: bash
-        run: |
-          set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
-          p = Path('android/app/build.gradle.kts')
-          t = p.read_text()
-          t = t.replace('JavaVersion.VERSION_17', 'JavaVersion.VERSION_21')
-          t = t.replace('JvmTarget.JVM_17', 'JvmTarget.JVM_21')
-          p.write_text(t)
+          p = Path("android/app/build.gradle.kts")
+          text = p.read_text()
+          text = text.replace("JavaVersion.VERSION_17", "JavaVersion.VERSION_21")
+          text = text.replace("JvmTarget.JVM_17", "JvmTarget.JVM_21")
+          p.write_text(text)
           PY
 
-      - name: Flutter Pub Get
+      - name: Get dependencies
         run: flutter pub get
 
-      - name: Generate Android icon
-        run: dart run flutter_launcher_icons
-
-      - name: Flutter Clean
+      - name: Clean
         run: flutter clean
 
-      - name: Flutter Pub Get (after clean)
+      - name: Get dependencies again
         run: flutter pub get
 
-      # Backend/Firebase is intentionally not initialized yet.
-      - name: Build Release APK
+      - name: Build APK
         run: flutter build apk --release --no-tree-shake-icons
 
       - name: Upload APK
