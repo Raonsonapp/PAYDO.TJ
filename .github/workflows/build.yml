@@ -1,177 +1,87 @@
-name: Build — Android / Web / iOS
-
-# Ин workflow-ро дастӣ аз таби "Actions" → "Build — Android / Web / iOS" →
-# "Run workflow" оғоз кунед, ё бо push кардани tag-и "v*" (масалан v0.1.0).
-#
-# ПЕШНИЁЗ (як бор дар GitHub Settings → Secrets and variables → Actions):
-#   FIREBASE_GOOGLE_SERVICES_JSON   — base64-и android/app/google-services.json
-#   FIREBASE_IOS_PLIST              — base64-и ios/Runner/GoogleService-Info.plist (агар iOS лозим бошад)
-#
-# Тавзеҳи пурра: docs/ci_cd.md
+name: PAYDO TJ — Android APK (offline UI)
 
 on:
   workflow_dispatch:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
-  # ==========================================================
-  # ANDROID — APK (санҷиш/тарқим бе Play Store) + AAB (Play Store)
-  # ==========================================================
   build-android:
-    name: Android (APK + AAB)
+    name: Build PAYDO TJ APK
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
 
-      - uses: subosito/flutter-action@v2
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Flutter 3.27.0 is kept deliberately for the current maplibre_gl 0.20.0.
+      - name: Setup Flutter 3.27.0
+        uses: subosito/flutter-action@v2
         with:
-          channel: stable
+          flutter-version: '3.27.0'
           cache: true
 
-      - uses: actions/setup-java@v4
+      # maplibre_gl 0.20.0's Android toolchain needs JDK 21.
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
         with:
-          distribution: 'temurin'
+          distribution: temurin
           java-version: '21'
 
-      - name: Санҷиши мавҷудияти google-services.json (secret)
+      - name: Generate Android platform with pinned Flutter
+        shell: bash
         run: |
-          if [ -z "${{ secrets.FIREBASE_GOOGLE_SERVICES_JSON }}" ]; then
-            echo "❌ Secret FIREBASE_GOOGLE_SERVICES_JSON холист."
-            echo "   Firebase Console → Project Settings → шумо файли"
-            echo "   google-services.json-ро зеркашӣ карда, base64 карда,"
-            echo "   ҳамчун secret бо ҳамин ном илова кунед (ниг. docs/ci_cd.md)."
-            exit 1
-          fi
+          set -euo pipefail
+          rm -rf android
+          flutter create . \
+            --platforms=android \
+            --org=tj.paydo \
+            --project-name=paydo_tj
 
-      - name: Тайёр кардани сохтори native Android (агар набошад)
+      - name: Set Android application label
+        shell: bash
         run: |
-          if [ ! -d "android" ]; then
-            echo "android/ мавҷуд нест — бо 'flutter create' сохта мешавад..."
-            flutter create . --platforms=android --org tj.paydo --project-name paydo_tj
-          else
-            echo "android/ аллакай мавҷуд аст."
-          fi
+          set -euo pipefail
+          MANIFEST="android/app/src/main/AndroidManifest.xml"
+          sed -i 's/android:label="[^\"]*"/android:label="PAYDO TJ"/' "$MANIFEST"
 
-      - name: Ҷойгиркунии google-services.json аз secret
+      - name: Set Java 21 compatibility
+        shell: bash
         run: |
-          mkdir -p android/app
-          echo "${{ secrets.FIREBASE_GOOGLE_SERVICES_JSON }}" | base64 --decode > android/app/google-services.json
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          p = Path('android/app/build.gradle.kts')
+          t = p.read_text()
+          t = t.replace('JavaVersion.VERSION_17', 'JavaVersion.VERSION_21')
+          t = t.replace('JvmTarget.JVM_17', 'JvmTarget.JVM_21')
+          p.write_text(t)
+          PY
 
-      - name: Install dependencies
+      - name: Flutter Pub Get
         run: flutter pub get
 
-      - name: Сохтани иконкаи APK аз лого
+      - name: Generate Android icon
         run: dart run flutter_launcher_icons
 
-      - name: flutter analyze
-        # Бе --fatal-infos — ниг. эзоҳи муфассал дар ci.yml.
-        run: flutter analyze
+      - name: Flutter Clean
+        run: flutter clean
 
-      - name: flutter test
-        run: flutter test
+      - name: Flutter Pub Get (after clean)
+        run: flutter pub get
 
-      - name: Build APK (release)
-        run: flutter build apk --release
+      # Backend/Firebase is intentionally not initialized yet.
+      - name: Build Release APK
+        run: flutter build apk --release --no-tree-shake-icons
 
-      - name: Build App Bundle — AAB (барои Play Store)
-        run: flutter build appbundle --release
-
-      - name: Бор кардани APK
+      - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: paydo-tj-android-apk
+          name: PAYDO-TJ-APK
           path: build/app/outputs/flutter-apk/app-release.apk
-          retention-days: 30
-
-      - name: Бор кардани AAB
-        uses: actions/upload-artifact@v4
-        with:
-          name: paydo-tj-android-aab
-          path: build/app/outputs/bundle/release/app-release.aab
-          retention-days: 30
-
-  # ==========================================================
-  # WEB
-  # ==========================================================
-  build-web:
-    name: Web (PWA)
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Тайёр кардани сохтори native Web (агар набошад)
-        run: |
-          if [ ! -d "web" ]; then
-            flutter create . --platforms=web --org tj.paydo --project-name paydo_tj
-          fi
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Сохтани иконкаи Web аз лого
-        run: dart run flutter_launcher_icons
-
-      - name: Build Web
-        run: flutter build web --release
-
-      - name: Бор кардани Web build
-        uses: actions/upload-artifact@v4
-        with:
-          name: paydo-tj-web
-          path: build/web
-          retention-days: 30
-
-  # ==========================================================
-  # iOS — bе имзо (unsigned). Барои App Store бояд дар Xcode/
-  # Apple Developer Program бо дасти худ имзо ва archive карда шавад —
-  # GitHub Actions наметавонад ин қадамро пурра ба ҷои шумо кунад бе
-  # сертификати Apple-и шумо (ниг. docs/ci_cd.md).
-  # ==========================================================
-  build-ios:
-    name: iOS (unsigned, барои санҷиш)
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: subosito/flutter-action@v2
-        with:
-          channel: stable
-          cache: true
-
-      - name: Тайёр кардани сохтори native iOS (агар набошад)
-        run: |
-          if [ ! -d "ios" ]; then
-            flutter create . --platforms=ios --org tj.paydo --project-name paydo_tj
-          fi
-
-      - name: Ҷойгиркунии GoogleService-Info.plist аз secret (агар дода шуда бошад)
-        run: |
-          if [ -n "${{ secrets.FIREBASE_IOS_PLIST }}" ]; then
-            mkdir -p ios/Runner
-            echo "${{ secrets.FIREBASE_IOS_PLIST }}" | base64 --decode > ios/Runner/GoogleService-Info.plist
-          else
-            echo "⚠️ Secret FIREBASE_IOS_PLIST дода нашудааст — iOS build бе Firebase config кӯшиш мекунад (метавонад ноком шавад)."
-          fi
-
-      - name: Install dependencies
-        run: flutter pub get
-
-      - name: Сохтани иконкаи iOS аз лого
-        run: dart run flutter_launcher_icons
-
-      - name: Build iOS (бе codesign)
-        run: flutter build ios --release --no-codesign
-
-      - name: Бор кардани iOS build (.app, барои санҷиш дар Simulator)
-        uses: actions/upload-artifact@v4
-        with:
-          name: paydo-tj-ios-unsigned
-          path: build/ios/iphoneos/Runner.app
+          if-no-files-found: error
           retention-days: 30
