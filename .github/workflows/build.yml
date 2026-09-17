@@ -51,25 +51,24 @@ jobs:
           from pathlib import Path
           import re
 
-          # ============================================================
-          # SETTINGS FILE
-          # Flutter 3.27 uses settings.gradle (Groovy).
-          # Support settings.gradle.kts too, just in case.
-          # ============================================================
+          # ------------------------------------------------------------
+          # Find settings.gradle / settings.gradle.kts
+          # ------------------------------------------------------------
 
-          settings_files = [
+          settings_candidates = [
               Path("android/settings.gradle"),
               Path("android/settings.gradle.kts"),
           ]
 
           settings = next(
-              (p for p in settings_files if p.exists()),
+              (p for p in settings_candidates if p.exists()),
               None,
           )
 
           if settings is None:
               raise FileNotFoundError(
-                  "Android settings.gradle / settings.gradle.kts not found"
+                  "Could not find android/settings.gradle or "
+                  "android/settings.gradle.kts"
               )
 
           text = settings.read_text()
@@ -81,7 +80,7 @@ jobs:
               text,
           )
 
-          # Kotlin plugin
+          # Kotlin Android plugin
           text = re.sub(
               r'(id\s*[("]\s*org\.jetbrains\.kotlin\.android\s*[")]\s*version\s*[")])[^"]+([")]\s*apply\s+false)',
               r'\g<1>1.9.24\g<2>',
@@ -90,26 +89,26 @@ jobs:
 
           settings.write_text(text)
 
-          print(f"Configured: {settings}")
+          print(f"Configured settings file: {settings}")
 
-          # ============================================================
-          # APP BUILD FILE
-          # Support BOTH Groovy and Kotlin DSL.
-          # ============================================================
+          # ------------------------------------------------------------
+          # Find app Gradle file
+          # ------------------------------------------------------------
 
-          app_files = [
+          app_candidates = [
               Path("android/app/build.gradle"),
               Path("android/app/build.gradle.kts"),
           ]
 
           app = next(
-              (p for p in app_files if p.exists()),
+              (p for p in app_candidates if p.exists()),
               None,
           )
 
           if app is None:
               raise FileNotFoundError(
-                  "android/app/build.gradle / build.gradle.kts not found"
+                  "Could not find android/app/build.gradle or "
+                  "android/app/build.gradle.kts"
               )
 
           text = app.read_text()
@@ -125,7 +124,7 @@ jobs:
               "JavaVersion.VERSION_21",
           )
 
-          # Kotlin JVM 21, when Kotlin DSL is used
+          # Kotlin JVM target
           text = text.replace(
               "JvmTarget.JVM_17",
               "JvmTarget.JVM_21",
@@ -136,7 +135,6 @@ jobs:
               "JvmTarget.JVM_21",
           )
 
-          # Kotlin compiler target, when Groovy DSL is used
           text = text.replace(
               "jvmTarget = '17'",
               "jvmTarget = '21'",
@@ -159,11 +157,39 @@ jobs:
 
           app.write_text(text)
 
-          print(f"Configured: {app}")
+          print(f"Configured app Gradle file: {app}")
 
-          # ============================================================
-          # APP NAME
-          # ============================================================
+          # ------------------------------------------------------------
+          # FIX GRADLE WRAPPER
+          # Flutter 3.27 can generate Gradle 8.3.
+          # AGP 8.7.3 requires Gradle 8.9.
+          # ------------------------------------------------------------
+
+          wrapper = Path(
+              "android/gradle/wrapper/gradle-wrapper.properties"
+          )
+
+          if not wrapper.exists():
+              raise FileNotFoundError(
+                  "android/gradle/wrapper/gradle-wrapper.properties "
+                  "not found"
+              )
+
+          text = wrapper.read_text()
+
+          text = re.sub(
+              r'distributionUrl=.*',
+              'distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-all.zip',
+              text,
+          )
+
+          wrapper.write_text(text)
+
+          print("Gradle Wrapper set to Gradle 8.9")
+
+          # ------------------------------------------------------------
+          # APP LABEL
+          # ------------------------------------------------------------
 
           manifest = Path(
               "android/app/src/main/AndroidManifest.xml"
@@ -184,27 +210,17 @@ jobs:
           print("Android configuration complete.")
           PY
 
-      - name: Show Android files
+      - name: Verify Gradle Wrapper
         shell: bash
         run: |
-          echo "===== Android structure ====="
-          find android -maxdepth 3 -type f | sort | head -200
+          set -euo pipefail
 
-          echo "===== Settings ====="
+          echo "===== Gradle Wrapper ====="
+          cat android/gradle/wrapper/gradle-wrapper.properties
 
-          if [ -f android/settings.gradle ]; then
-            cat android/settings.gradle
-          elif [ -f android/settings.gradle.kts ]; then
-            cat android/settings.gradle.kts
-          fi
-
-          echo "===== App Gradle ====="
-
-          if [ -f android/app/build.gradle ]; then
-            cat android/app/build.gradle
-          elif [ -f android/app/build.gradle.kts ]; then
-            cat android/app/build.gradle.kts
-          fi
+          echo "===== Gradle Version ====="
+          cd android
+          ./gradlew --version
 
       - name: Flutter Pub Get
         run: flutter pub get
