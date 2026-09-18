@@ -155,6 +155,48 @@ jobs:
               'jvmTarget = "21"',
           )
 
+          # ------------------------------------------------------------
+          # Minimum SDK
+          # firebase_auth 23.2.1 requires a minSdk of at least 23,
+          # but Flutter's default template minSdk is 21.
+          # ------------------------------------------------------------
+
+          text = text.replace(
+              "minSdk = flutter.minSdkVersion",
+              "minSdk = 23",
+          )
+
+          text = text.replace(
+              "minSdkVersion = flutter.minSdkVersion",
+              "minSdkVersion = 23",
+          )
+
+          text = text.replace(
+              "minSdkVersion flutter.minSdkVersion",
+              "minSdkVersion 23",
+          )
+
+          # ------------------------------------------------------------
+          # Android NDK
+          # cloud_firestore, firebase_auth, connectivity_plus, etc. all
+          # require a newer NDK than Flutter's default template NDK.
+          # ------------------------------------------------------------
+
+          text = text.replace(
+              "ndkVersion = flutter.ndkVersion",
+              'ndkVersion = "27.0.12077973"',
+          )
+
+          text = text.replace(
+              "ndkVersion = flutter.ndkVersion.toString()",
+              'ndkVersion = "27.0.12077973"',
+          )
+
+          text = text.replace(
+              "ndkVersion flutter.ndkVersion",
+              'ndkVersion "27.0.12077973"',
+          )
+
           app.write_text(text)
 
           print(f"Configured app Gradle file: {app}")
