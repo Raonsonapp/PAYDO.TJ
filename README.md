@@ -26,7 +26,8 @@ Super App / marketplace-и бисёрфунксионалӣ барои Тоҷи�
 | 15 | Notifications | ✅ Анҷом ёфт |
 | 16 | Ratings / Reviews | ✅ Анҷом ёфт |
 | 17 | Search and filters | ✅ Анҷом ёфт |
-| 18–25 | ... | ⏳ Дар навбат |
+| 18 | Advertising / Premium | ✅ UI/MVP (offline) |
+| 19–25 | ... | ⏳ Дар навбат |
 
 Ниг. [`docs/roadmap.md`](docs/roadmap.md) барои феҳристи пурраи марҳилаҳо.
 
