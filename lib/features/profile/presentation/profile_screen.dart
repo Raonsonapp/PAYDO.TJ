@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
 
-import '../../../core/constants/app_strings.dart';
-import '../../../core/theme/app_colors.dart';
-
-/// Профили воқеӣ баъд аз пайваст кардани Firebase фаъол мешавад.
-/// Дар build-и ҳозира экран комилан offline аст, то startup ба backend
-/// вобаста набошад ва дар дастгоҳҳои Xiaomi низ UI дуруст намоён шавад.
 class ProfileScreen extends StatelessWidget {
   const ProfileScreen({super.key});
 
@@ -13,82 +7,175 @@ class ProfileScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.navProfile),
+        title: const Text('Профил'),
+        centerTitle: true,
       ),
-      body: ListView(
-        padding: const EdgeInsets.all(20),
-        children: [
-          const CircleAvatar(
-            radius: 44,
-            backgroundColor: AppColors.primaryLight,
-            child: Icon(
-              Icons.person_rounded,
-              size: 48,
-              color: AppColors.primary,
-            ),
-          ),
-          const SizedBox(height: 16),
-          Text(
-            'Профили ман',
-            textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .titleLarge
-                ?.copyWith(fontWeight: FontWeight.bold),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            'Пайвасти Firebase ва сабти профил дар марҳилаи backend фаъол мешавад.',
-            textAlign: TextAlign.center,
-            style: Theme.of(context)
-                .textTheme
-                .bodyMedium
-                ?.copyWith(color: AppColors.textSecondaryLight),
-          ),
-          const SizedBox(height: 24),
-          Card(
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                children: const [
-                  _InfoRow(icon: Icons.phone_outlined, label: 'Телефон', value: '—'),
-                  Divider(height: 24),
-                  _InfoRow(icon: Icons.location_city_outlined, label: 'Шаҳр', value: '—'),
-                  Divider(height: 24),
-                  _InfoRow(icon: Icons.cake_outlined, label: 'Синну сол', value: '—'),
-                ],
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(16),
+          child: Column(
+            children: [
+              const SizedBox(height: 12),
+
+              // Profile avatar
+              CircleAvatar(
+                radius: 48,
+                backgroundColor: Colors.grey.shade200,
+                child: Icon(
+                  Icons.person,
+                  size: 54,
+                  color: Colors.grey.shade600,
+                ),
               ),
-            ),
+
+              const SizedBox(height: 16),
+
+              const Text(
+                'Корбар',
+                style: TextStyle(
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+
+              const SizedBox(height: 6),
+
+              Text(
+                'Ба аккаунт ворид нашудаед',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey.shade600,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              _ProfileItem(
+                icon: Icons.person_outline,
+                title: 'Маълумоти шахсӣ',
+                onTap: () {
+                  _showOfflineMessage(context);
+                },
+              ),
+
+              _ProfileItem(
+                icon: Icons.shopping_bag_outlined,
+                title: 'Фармоишҳои ман',
+                onTap: () {
+                  _showOfflineMessage(context);
+                },
+              ),
+
+              _ProfileItem(
+                icon: Icons.favorite_border,
+                title: 'Маҳсулотҳои дӯстдошта',
+                onTap: () {
+                  _showOfflineMessage(context);
+                },
+              ),
+
+              _ProfileItem(
+                icon: Icons.settings_outlined,
+                title: 'Танзимот',
+                onTap: () {
+                  _showOfflineMessage(context);
+                },
+              ),
+
+              _ProfileItem(
+                icon: Icons.help_outline,
+                title: 'Кӯмак',
+                onTap: () {
+                  _showOfflineMessage(context);
+                },
+              ),
+
+              const SizedBox(height: 20),
+
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(16),
+                decoration: BoxDecoration(
+                  color: Colors.grey.shade100,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: const Column(
+                  children: [
+                    Icon(
+                      Icons.cloud_off_outlined,
+                      size: 36,
+                      color: Colors.grey,
+                    ),
+                    SizedBox(height: 10),
+                    Text(
+                      'Ҳолати offline',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    SizedBox(height: 6),
+                    Text(
+                      'Firebase ва backend баъдтар пайваст карда мешаванд.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        color: Colors.grey,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
+      ),
+    );
+  }
+
+  static void _showOfflineMessage(BuildContext context) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Ин имконият баъд аз пайваст кардани backend фаъол мешавад.',
+        ),
       ),
     );
   }
 }
 
-class _InfoRow extends StatelessWidget {
+class _ProfileItem extends StatelessWidget {
   final IconData icon;
-  final String label;
-  final String value;
+  final String title;
+  final VoidCallback onTap;
 
-  const _InfoRow({
+  const _ProfileItem({
     required this.icon,
-    required this.label,
-    required this.value,
+    required this.title,
+    required this.onTap,
   });
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Icon(icon, size: 20, color: AppColors.textSecondaryLight),
-        const SizedBox(width: 12),
-        Expanded(child: Text(label)),
-        Text(
-          value,
-          style: const TextStyle(fontWeight: FontWeight.w600),
+    return Card(
+      margin: const EdgeInsets.only(bottom: 10),
+      elevation: 0,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(14),
+      ),
+      child: ListTile(
+        onTap: onTap,
+        leading: Icon(icon),
+        title: Text(
+          title,
+          style: const TextStyle(
+            fontWeight: FontWeight.w500,
+          ),
         ),
-      ],
+        trailing: const Icon(
+          Icons.chevron_right,
+        ),
+      ),
     );
   }
 }
