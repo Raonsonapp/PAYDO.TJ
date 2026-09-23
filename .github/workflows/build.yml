@@ -1,4 +1,4 @@
-name: PAYDO TJ Android APK
+name: Build PAYDO.TJ APK
 
 on:
   workflow_dispatch:
@@ -10,237 +10,69 @@ permissions:
   contents: read
 
 jobs:
-  build:
-    name: Build PAYDO TJ APK
+  build-apk:
+    name: Build Release APK
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      # 1. Download repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Flutter 3.27.0
-        uses: subosito/flutter-action@v2
-        with:
-          flutter-version: '3.27.0'
-          cache: true
-
+      # 2. Java 21
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
+          cache: gradle
 
-      - name: Recreate Android project
-        shell: bash
+      # 3. Flutter 3.27.0
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.27.0'
+          channel: stable
+          cache: true
+
+      # 4. Check versions
+      - name: Check Flutter and Java
         run: |
-          set -euo pipefail
+          flutter --version
+          java -version
 
-          rm -rf android
-
-          flutter create . \
-            --platforms=android \
-            --org=tj.paydo \
-            --project-name=paydo_tj
-
-      - name: Configure Android Gradle
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          python3 - <<'PY'
-          from pathlib import Path
-          import re
-
-          # ------------------------------------------------------------
-          # Find settings.gradle / settings.gradle.kts
-          # ------------------------------------------------------------
-
-          settings_candidates = [
-              Path("android/settings.gradle"),
-              Path("android/settings.gradle.kts"),
-          ]
-
-          settings = next(
-              (p for p in settings_candidates if p.exists()),
-              None,
-          )
-
-          if settings is None:
-              raise FileNotFoundError(
-                  "Could not find android/settings.gradle or "
-                  "android/settings.gradle.kts"
-              )
-
-          text = settings.read_text()
-
-          # Android Gradle Plugin
-          text = re.sub(
-              r'(id\s*[("]\s*com\.android\.application\s*[")]\s*version\s*[")])[^"]+([")]\s*apply\s+false)',
-              r'\g<1>8.7.3\g<2>',
-              text,
-          )
-
-          # Kotlin Android plugin
-          text = re.sub(
-              r'(id\s*[("]\s*org\.jetbrains\.kotlin\.android\s*[")]\s*version\s*[")])[^"]+([")]\s*apply\s+false)',
-              r'\g<1>1.9.24\g<2>',
-              text,
-          )
-
-          settings.write_text(text)
-
-          print(f"Configured settings file: {settings}")
-
-          # ------------------------------------------------------------
-          # Find app Gradle file
-          # ------------------------------------------------------------
-
-          app_candidates = [
-              Path("android/app/build.gradle"),
-              Path("android/app/build.gradle.kts"),
-          ]
-
-          app = next(
-              (p for p in app_candidates if p.exists()),
-              None,
-          )
-
-          if app is None:
-              raise FileNotFoundError(
-                  "Could not find android/app/build.gradle or "
-                  "android/app/build.gradle.kts"
-              )
-
-          text = app.read_text()
-
-          # Java 21
-          text = text.replace(
-              "JavaVersion.VERSION_17",
-              "JavaVersion.VERSION_21",
-          )
-
-          text = text.replace(
-              "JavaVersion.VERSION_11",
-              "JavaVersion.VERSION_21",
-          )
-
-          # Kotlin JVM target
-          text = text.replace(
-              "JvmTarget.JVM_17",
-              "JvmTarget.JVM_21",
-          )
-
-          text = text.replace(
-              "JvmTarget.JVM_11",
-              "JvmTarget.JVM_21",
-          )
-
-          text = text.replace(
-              "jvmTarget = '17'",
-              "jvmTarget = '21'",
-          )
-
-          text = text.replace(
-              'jvmTarget = "17"',
-              'jvmTarget = "21"',
-          )
-
-          text = text.replace(
-              "jvmTarget = '11'",
-              "jvmTarget = '21'",
-          )
-
-          text = text.replace(
-              'jvmTarget = "11"',
-              'jvmTarget = "21"',
-          )
-
-          app.write_text(text)
-
-          print(f"Configured app Gradle file: {app}")
-
-          # ------------------------------------------------------------
-          # FIX GRADLE WRAPPER
-          # Flutter 3.27 can generate Gradle 8.3.
-          # AGP 8.7.3 requires Gradle 8.9.
-          # ------------------------------------------------------------
-
-          wrapper = Path(
-              "android/gradle/wrapper/gradle-wrapper.properties"
-          )
-
-          if not wrapper.exists():
-              raise FileNotFoundError(
-                  "android/gradle/wrapper/gradle-wrapper.properties "
-                  "not found"
-              )
-
-          text = wrapper.read_text()
-
-          text = re.sub(
-              r'distributionUrl=.*',
-              'distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-all.zip',
-              text,
-          )
-
-          wrapper.write_text(text)
-
-          print("Gradle Wrapper set to Gradle 8.9")
-
-          # ------------------------------------------------------------
-          # APP LABEL
-          # ------------------------------------------------------------
-
-          manifest = Path(
-              "android/app/src/main/AndroidManifest.xml"
-          )
-
-          if manifest.exists():
-              text = manifest.read_text()
-
-              text = re.sub(
-                  r'android:label="[^"]*"',
-                  'android:label="PAYDO TJ"',
-                  text,
-                  count=1,
-              )
-
-              manifest.write_text(text)
-
-          print("Android configuration complete.")
-          PY
-
-      - name: Verify Gradle Wrapper
-        shell: bash
-        run: |
-          set -euo pipefail
-
-          echo "===== Gradle Wrapper ====="
-          cat android/gradle/wrapper/gradle-wrapper.properties
-
-          echo "===== Gradle Version ====="
-          cd android
-          ./gradlew --version
-
-      - name: Flutter Pub Get
+      # 5. Get dependencies
+      - name: Flutter pub get
         run: flutter pub get
 
-      - name: Generate launcher icons
-        run: dart run flutter_launcher_icons
+      # 6. Make sure Android platform exists
+      - name: Prepare Android project
+        run: |
+          if [ ! -d "android" ]; then
+            flutter create --platforms=android .
+          fi
 
-      - name: Flutter Clean
-        run: flutter clean
+      # 7. Configure Gradle 8.9
+      - name: Configure Gradle
+        working-directory: android
+        run: |
+          chmod +x gradlew
+          ./gradlew wrapper --gradle-version 8.9
 
-      - name: Flutter Pub Get Again
-        run: flutter pub get
-
+      # 8. Build release APK
       - name: Build Release APK
-        run: flutter build apk --release --no-tree-shake-icons
+        run: flutter build apk --release
 
+      # 9. Show generated APK
+      - name: Check APK
+        run: |
+          ls -lh build/app/outputs/flutter-apk/
+          file build/app/outputs/flutter-apk/app-release.apk
+
+      # 10. Upload APK
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: PAYDO-TJ-APK
           path: build/app/outputs/flutter-apk/app-release.apk
           if-no-files-found: error
-          retention-days: 30
