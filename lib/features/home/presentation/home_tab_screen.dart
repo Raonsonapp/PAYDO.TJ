@@ -1,162 +1,191 @@
 import 'package:flutter/material.dart';
-import '../../../core/constants/app_strings.dart';
-import '../../../core/theme/app_colors.dart';
-import '../domain/home_category.dart';
 
-/// Home tab-и асосӣ. Ин феҳристи виҷетҳои дигар (RootShell)-ро надорад —
-/// он худ як "tab body" аст, на Scaffold-и мустақил, то бо
-/// BottomNavigationBar-и RootShell дуруст кор кунад.
 class HomeTabScreen extends StatelessWidget {
-  final VoidCallback? onSearchTap;
-  final ValueChanged<String>? onCategoryTap;
-
-  const HomeTabScreen({
-    super.key,
-    this.onSearchTap,
-    this.onCategoryTap,
-  });
+  const HomeTabScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
-    const userName = '';
-
     return Scaffold(
       appBar: AppBar(
-        title: const Text(AppStrings.appName),
+        title: const Text('PAYDO.TJ'),
         centerTitle: false,
       ),
-      body: SafeArea(
-        child: CustomScrollView(
-          slivers: [
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(20, 12, 20, 0),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    if (userName.isNotEmpty)
-                      Text(
-                        'Салом, $userName 👋',
-                        style: Theme.of(context)
-                            .textTheme
-                            .titleMedium
-                            ?.copyWith(fontWeight: FontWeight.w600),
-                      ),
-                    const SizedBox(height: 4),
-                    Text(
-                      AppStrings.appTagline,
-                      style: Theme.of(context)
-                          .textTheme
-                          .bodySmall
-                          ?.copyWith(color: AppColors.textSecondaryLight),
-                    ),
-                    const SizedBox(height: 16),
-                    _SearchBar(onTap: onSearchTap),
-                    const SizedBox(height: 24),
-                    Text(
-                      'Категорияҳо',
-                      style: Theme.of(context)
-                          .textTheme
-                          .titleMedium
-                          ?.copyWith(fontWeight: FontWeight.w600),
-                    ),
-                    const SizedBox(height: 12),
-                  ],
+      body: const SafeArea(
+        child: SingleChildScrollView(
+          padding: EdgeInsets.all(16),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              _WelcomeCard(),
+              SizedBox(height: 20),
+              Text(
+                'Категорияҳо',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 4,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 12,
-                  childAspectRatio: 0.78,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final category = HomeCategory.all[index];
-                    return _CategoryTile(
-                      category: category,
-                      onTap: () => onCategoryTap?.call(category.routeKey),
-                    );
-                  },
-                  childCount: HomeCategory.all.length,
+              SizedBox(height: 12),
+              _CategoryGrid(),
+              SizedBox(height: 24),
+              Text(
+                'Эълонҳои нав',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontWeight: FontWeight.bold,
                 ),
               ),
-            ),
-            const SliverToBoxAdapter(child: SizedBox(height: 32)),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SearchBar extends StatelessWidget {
-  final VoidCallback? onTap;
-  const _SearchBar({this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(14),
-      child: Container(
-        height: 48,
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        decoration: BoxDecoration(
-          color: AppColors.surfaceLight,
-          borderRadius: BorderRadius.circular(14),
-          border: Border.all(color: AppColors.borderLight),
-        ),
-        child: Row(
-          children: [
-            const Icon(Icons.search_rounded,
-                color: AppColors.textSecondaryLight),
-            const SizedBox(width: 10),
-            Text(
-              'Ҷустуҷӯи маҳсулот, кор, хизмат...',
-              style: TextStyle(color: AppColors.textSecondaryLight.withOpacity(0.9)),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _CategoryTile extends StatelessWidget {
-  final HomeCategory category;
-  final VoidCallback onTap;
-
-  const _CategoryTile({required this.category, required this.onTap});
-
-  @override
-  Widget build(BuildContext context) {
-    return InkWell(
-      onTap: onTap,
-      borderRadius: BorderRadius.circular(16),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 56,
-            height: 56,
-            decoration: BoxDecoration(
-              color: category.color.withOpacity(0.12),
-              borderRadius: BorderRadius.circular(16),
-            ),
-            child: Icon(category.icon, color: category.color, size: 26),
+              SizedBox(height: 12),
+              _EmptyAdsCard(),
+            ],
           ),
-          const SizedBox(height: 6),
+        ),
+      ),
+    );
+  }
+}
+
+class _WelcomeCard extends StatelessWidget {
+  const _WelcomeCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(20),
+        gradient: const LinearGradient(
+          colors: [
+            Color(0xFF1976D2),
+            Color(0xFF42A5F5),
+          ],
+        ),
+      ),
+      child: const Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
           Text(
-            category.label,
+            'Хуш омадед ба PAYDO.TJ 👋',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          SizedBox(height: 8),
+          Text(
+            'Маҳсулот, кор, хизматрасонӣ ва эълонҳоро дар як ҷо пайдо кунед.',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 15,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _CategoryGrid extends StatelessWidget {
+  const _CategoryGrid();
+
+  @override
+  Widget build(BuildContext context) {
+    final categories = [
+      ('🛒', 'Маҳсулот'),
+      ('💼', 'Кор'),
+      ('🛠️', 'Хизматрасонӣ'),
+      ('📢', 'Эълон'),
+    ];
+
+    return GridView.builder(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: categories.length,
+      gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+        crossAxisCount: 2,
+        crossAxisSpacing: 12,
+        mainAxisSpacing: 12,
+        childAspectRatio: 1.45,
+      ),
+      itemBuilder: (context, index) {
+        final item = categories[index];
+
+        return Card(
+          elevation: 1,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(16),
+            onTap: () {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(
+                    '${item.$2} — ҳоло дар ҳолати offline аст.',
+                  ),
+                ),
+              );
+            },
+            child: Column(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  item.$1,
+                  style: const TextStyle(fontSize: 30),
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  item.$2,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _EmptyAdsCard extends StatelessWidget {
+  const _EmptyAdsCard();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(24),
+      decoration: BoxDecoration(
+        color: Colors.grey.shade100,
+        borderRadius: BorderRadius.circular(16),
+      ),
+      child: const Column(
+        children: [
+          Icon(
+            Icons.storefront_outlined,
+            size: 48,
+            color: Colors.grey,
+          ),
+          SizedBox(height: 12),
+          Text(
+            'Ҳоло эълоне нест',
+            style: TextStyle(
+              fontSize: 17,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          SizedBox(height: 6),
+          Text(
+            'Баъд аз пайваст кардани backend эълонҳо дар ин ҷо нишон дода мешаванд.',
             textAlign: TextAlign.center,
-            maxLines: 2,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(fontSize: 11.5, fontWeight: FontWeight.w500),
+            style: TextStyle(
+              color: Colors.grey,
+            ),
           ),
         ],
       ),
