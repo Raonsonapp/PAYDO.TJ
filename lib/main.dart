@@ -9,19 +9,46 @@ import 'features/home/presentation/root_shell.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // Дар ин марҳила backend/Firebase ҳанӯз пайваст нест.
-  // Барнома бояд ҳатман UI-и маҳаллиро нишон диҳад ва ба server
-  // ё Firebase ҳангоми startup вобаста набошад.
+  // Агар ҳангоми оғоз хатое шавад, ба ҷойи экрани сиёҳ/хокистарӣ
+  // хатои намоён нишон дода мешавад.
   ErrorWidget.builder = (FlutterErrorDetails details) {
     return Material(
-      color: AppTheme.light.scaffoldBackgroundColor,
+      color: Colors.white,
       child: Center(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Text(
-            'PAYDO TJ\n\nДар оғоз хатои UI ба вуҷуд омад.\nЛутфан барномаро аз нав кушоед.',
-            textAlign: TextAlign.center,
-            style: AppTheme.light.textTheme.bodyLarge,
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Icon(
+                Icons.error_outline,
+                size: 56,
+                color: Colors.red,
+              ),
+              const SizedBox(height: 16),
+              const Text(
+                'PAYDO.TJ',
+                style: TextStyle(
+                  fontSize: 24,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+              const SizedBox(height: 12),
+              const Text(
+                'Ҳангоми оғоз кардани барнома хато рӯй дод.',
+                textAlign: TextAlign.center,
+                style: TextStyle(fontSize: 16),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                details.exceptionAsString(),
+                textAlign: TextAlign.center,
+                style: const TextStyle(
+                  fontSize: 12,
+                  color: Colors.grey,
+                ),
+              ),
+            ],
           ),
         ),
       ),
@@ -29,12 +56,12 @@ Future<void> main() async {
   };
 
   runZonedGuarded(
-    () => runApp(const PaydoApp()),
-    (error, stack) {
-      // Барои release build барнома бо сабаби exception-и startup
-      // дар экран танҳо splash/gray background намемонад.
-      debugPrint('PAYDO TJ startup error: $error');
-      debugPrintStack(stackTrace: stack);
+    () {
+      runApp(const PaydoApp());
+    },
+    (error, stackTrace) {
+      debugPrint('PAYDO.TJ ERROR: $error');
+      debugPrintStack(stackTrace: stackTrace);
     },
   );
 }
@@ -48,8 +75,6 @@ class PaydoApp extends StatelessWidget {
       title: AppStrings.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
-      // PAYDO TJ дар ин марҳила аз Dark/Light-и системаи телефон
-      // пайравӣ намекунад.
       themeMode: ThemeMode.light,
       home: const RootShell(),
     );
