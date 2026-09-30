@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:url_launcher/url_launcher.dart';
 
-import '../../../core/theme/app_colors.dart';
+import '../theme/app_colors.dart';
 
 /// Тугмаи хурди "chip" барои пайвандҳои иҷтимоӣ (Instagram/WhatsApp).
 /// Дар PHASE 5 (Business Profile) ин ҳамон виҷет истифода мешавад —
