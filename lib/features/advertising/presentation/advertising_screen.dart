@@ -1,247 +1,29 @@
 import 'package:flutter/material.dart';
+import '../../../core/constants/app_strings.dart';
+import '../../../core/theme/app_colors.dart';
 
 class AdvertisingScreen extends StatelessWidget {
   const AdvertisingScreen({super.key});
-
   @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text('Пешбарии эълон'),
-        centerTitle: true,
-      ),
-      body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              const Text(
-                'Эълони худро пешбарӣ кунед',
-                style: TextStyle(
-                  fontSize: 24,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 8),
-
-              Text(
-                'Эълони пешбаришуда дар ҷойҳои намоёнтар нишон дода мешавад.',
-                style: TextStyle(
-                  fontSize: 14,
-                  color: Colors.grey.shade600,
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              _BoostCard(
-                title: 'Пешбарӣ — 1 рӯз',
-                subtitle: 'Эълони шумо 1 рӯз пешбарӣ мешавад.',
-                icon: Icons.flash_on,
-                onTap: () {
-                  _showPendingMessage(context);
-                },
-              ),
-
-              const SizedBox(height: 12),
-
-              _BoostCard(
-                title: 'Пешбарӣ — 7 рӯз',
-                subtitle: 'Эълони шумо 7 рӯз пешбарӣ мешавад.',
-                icon: Icons.rocket_launch,
-                onTap: () {
-                  _showPendingMessage(context);
-                },
-              ),
-
-              const SizedBox(height: 28),
-
-              const Text(
-                'PAYDO Premium',
-                style: TextStyle(
-                  fontSize: 22,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-
-              const SizedBox(height: 12),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(
-                    color: Colors.amber,
-                  ),
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Row(
-                      children: [
-                        Icon(
-                          Icons.workspace_premium,
-                          size: 34,
-                          color: Colors.amber,
-                        ),
-                        SizedBox(width: 12),
-                        Text(
-                          'PAYDO Premium',
-                          style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ],
-                    ),
-
-                    const SizedBox(height: 14),
-
-                    _PremiumFeature(
-                      text: 'Имкониятҳои иловагӣ',
-                    ),
-                    _PremiumFeature(
-                      text: 'Пешбарии эълонҳо',
-                    ),
-                    _PremiumFeature(
-                      text: 'Афзалият дар намоиш',
-                    ),
-
-                    const SizedBox(height: 18),
-
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () {
-                          _showPendingMessage(context);
-                        },
-                        child: const Text(
-                          'Фаъол кардан',
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-
-              const SizedBox(height: 24),
-
-              Container(
-                width: double.infinity,
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: Colors.grey.shade100,
-                  borderRadius: BorderRadius.circular(16),
-                ),
-                child: const Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Icon(
-                      Icons.info_outline,
-                      color: Colors.grey,
-                    ),
-                    SizedBox(width: 12),
-                    Expanded(
-                      child: Text(
-                        'Пардохт ва фаъолсозии воқеии Premium баъд аз пайваст кардани backend ва системаи пардохт илова карда мешавад.',
-                        style: TextStyle(
-                          fontSize: 13,
-                          color: Colors.grey,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  static void _showPendingMessage(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text(
-          'Ин имконият баъд аз пайваст кардани backend ва пардохт фаъол мешавад.',
-        ),
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Scaffold(
+    appBar: AppBar(title: const Text(AppStrings.advertisingTitle)),
+    body: ListView(padding: const EdgeInsets.all(16), children: [
+      Text(AppStrings.advertisingSubtitle, style: Theme.of(context).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.bold)),
+      const SizedBox(height: 16),
+      _Plan(title: 'Пешбарӣ — 1 рӯз', subtitle: 'Эълон дар ҷойи намоён', icon: Icons.rocket_launch_outlined),
+      const SizedBox(height: 12),
+      _Plan(title: 'Пешбарӣ — 7 рӯз', subtitle: 'Намоиши бештар барои эълон', icon: Icons.bolt_outlined),
+      const SizedBox(height: 24),
+      Card(child: ListTile(leading: const Icon(Icons.workspace_premium_outlined, color: AppColors.primary), title: const Text(AppStrings.advertisingPremium), subtitle: const Text('Имкониятҳои иловагӣ барои фурӯшандаҳо'))),
+      const SizedBox(height: 16),
+      const Text(AppStrings.advertisingBackendPending, textAlign: TextAlign.center, style: TextStyle(color: AppColors.textSecondaryLight)),
+    ]),
+  );
 }
 
-class _BoostCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final VoidCallback onTap;
-
-  const _BoostCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.onTap,
-  });
-
+class _Plan extends StatelessWidget {
+  final String title, subtitle; final IconData icon;
+  const _Plan({required this.title, required this.subtitle, required this.icon});
   @override
-  Widget build(BuildContext context) {
-    return Card(
-      elevation: 1,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(18),
-      ),
-      child: ListTile(
-        contentPadding: const EdgeInsets.all(16),
-        leading: CircleAvatar(
-          radius: 25,
-          child: Icon(icon),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        subtitle: Padding(
-          padding: const EdgeInsets.only(top: 6),
-          child: Text(subtitle),
-        ),
-        trailing: const Icon(
-          Icons.chevron_right,
-        ),
-        onTap: onTap,
-      ),
-    );
-  }
-}
-
-class _PremiumFeature extends StatelessWidget {
-  final String text;
-
-  const _PremiumFeature({
-    required this.text,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 8),
-      child: Row(
-        children: [
-          const Icon(
-            Icons.check_circle_outline,
-            size: 20,
-          ),
-          const SizedBox(width: 8),
-          Expanded(
-            child: Text(text),
-          ),
-        ],
-      ),
-    );
-  }
+  Widget build(BuildContext context) => Card(child: ListTile(leading: Icon(icon, color: AppColors.primary), title: Text(title), subtitle: Text(subtitle), trailing: ElevatedButton(onPressed: () => ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text(AppStrings.advertisingBackendPending))), child: const Text('Интихоб'))));
 }
