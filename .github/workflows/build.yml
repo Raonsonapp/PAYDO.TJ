@@ -1,36 +1,88 @@
 name: Build PAYDO.TJ APK
+
 on:
   workflow_dispatch:
   push:
     branches: [main]
+
 permissions:
   contents: read
+
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-java@v4
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Java 21
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '21'
           cache: gradle
-      - uses: subosito/flutter-action@v2
+
+      - name: Setup Flutter
+        uses: subosito/flutter-action@v2
         with:
           flutter-version: '3.27.0'
           channel: stable
           cache: true
-      - run: flutter --version
-      - run: java -version
-      - run: flutter pub get
-      - name: Configure Gradle wrapper
-        working-directory: android
+
+      - name: Check toolchain
         run: |
-          chmod +x gradlew
-          ./gradlew wrapper --gradle-version 8.9
-      - run: flutter build apk --release
-      - run: ls -lh build/app/outputs/flutter-apk/
-      - uses: actions/upload-artifact@v4
+          flutter --version
+          java -version
+
+      - name: Flutter pub get
+        run: flutter pub get
+
+      - name: Restore Gradle wrapper
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if [ ! -f android/gradlew ] || [ ! -f android/gradle/wrapper/gradle-wrapper.jar ]; then
+            tmp_root="$(mktemp -d)"
+            trap 'rm -rf "$tmp_root"' EXIT
+
+            flutter create "$tmp_root/wrapper_project" \
+              --platforms=android \
+              --org=tj.paydo \
+              --project-name=wrapper_project
+
+            cp "$tmp_root/wrapper_project/android/gradlew" \
+              android/gradlew
+
+            cp "$tmp_root/wrapper_project/android/gradlew.bat" \
+              android/gradlew.bat
+
+            mkdir -p android/gradle/wrapper
+
+            cp "$tmp_root/wrapper_project/android/gradle/wrapper/gradle-wrapper.jar" \
+              android/gradle/wrapper/gradle-wrapper.jar
+          fi
+
+          chmod +x android/gradlew
+
+          sed -i \
+            's#^distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-all.zip#' \
+            android/gradle/wrapper/gradle-wrapper.properties
+
+          test -f android/gradlew
+          test -f android/gradle/wrapper/gradle-wrapper.jar
+
+      - name: Build release APK
+        run: flutter build apk --release
+
+      - name: Check APK
+        run: |
+          test -f build/app/outputs/flutter-apk/app-release.apk
+          ls -lh build/app/outputs/flutter-apk/app-release.apk
+
+      - name: Upload APK
+        uses: actions/upload-artifact@v4
         with:
           name: PAYDO-TJ-APK
           path: build/app/outputs/flutter-apk/app-release.apk
