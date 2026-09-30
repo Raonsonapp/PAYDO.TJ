@@ -3,84 +3,136 @@ name: Build PAYDO.TJ APK
 on:
   workflow_dispatch:
   push:
-    branches: [main]
+    branches:
+      - main
 
 permissions:
   contents: read
 
 jobs:
   build-apk:
+    name: Build Android APK
     runs-on: ubuntu-latest
 
     steps:
+      # --------------------------------------------------
+      # 1. Checkout
+      # --------------------------------------------------
       - name: Checkout
         uses: actions/checkout@v4
 
+      # --------------------------------------------------
+      # 2. Java
+      # --------------------------------------------------
       - name: Setup Java 21
         uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: '21'
+          java-version: "21"
           cache: gradle
 
+      # --------------------------------------------------
+      # 3. Flutter
+      # --------------------------------------------------
       - name: Setup Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.27.0'
+          flutter-version: "3.27.0"
           channel: stable
           cache: true
 
-      - name: Check toolchain
+      # --------------------------------------------------
+      # 4. Toolchain check
+      # --------------------------------------------------
+      - name: Check Flutter and Java
         run: |
           flutter --version
           java -version
 
+      # --------------------------------------------------
+      # 5. Dependencies
+      # --------------------------------------------------
       - name: Flutter pub get
         run: flutter pub get
 
+      # --------------------------------------------------
+      # 6. Restore Gradle Wrapper
+      #
+      # Repository currently does not contain the wrapper
+      # scripts/JAR, so generate them safely in CI.
+      # --------------------------------------------------
       - name: Restore Gradle wrapper
         shell: bash
         run: |
           set -euo pipefail
 
-          if [ ! -f android/gradlew ] || [ ! -f android/gradle/wrapper/gradle-wrapper.jar ]; then
-            tmp_root="$(mktemp -d)"
-            trap 'rm -rf "$tmp_root"' EXIT
+          if [ ! -f android/gradlew ] || \
+             [ ! -f android/gradlew.bat ] || \
+             [ ! -f android/gradle/wrapper/gradle-wrapper.jar ]; then
 
-            flutter create "$tmp_root/wrapper_project" \
+            TMP_ROOT="$(mktemp -d)"
+            trap 'rm -rf "$TMP_ROOT"' EXIT
+
+            flutter create "$TMP_ROOT/wrapper_project" \
               --platforms=android \
               --org=tj.paydo \
               --project-name=wrapper_project
 
-            cp "$tmp_root/wrapper_project/android/gradlew" \
+            cp "$TMP_ROOT/wrapper_project/android/gradlew" \
               android/gradlew
 
-            cp "$tmp_root/wrapper_project/android/gradlew.bat" \
+            cp "$TMP_ROOT/wrapper_project/android/gradlew.bat" \
               android/gradlew.bat
 
             mkdir -p android/gradle/wrapper
 
-            cp "$tmp_root/wrapper_project/android/gradle/wrapper/gradle-wrapper.jar" \
+            cp "$TMP_ROOT/wrapper_project/android/gradle/wrapper/gradle-wrapper.jar" \
               android/gradle/wrapper/gradle-wrapper.jar
           fi
 
           chmod +x android/gradlew
 
+          # PAYDO.TJ uses AGP 8.7.3,
+          # therefore Gradle 8.9 is required.
           sed -i \
             's#^distributionUrl=.*#distributionUrl=https\\://services.gradle.org/distributions/gradle-8.9-all.zip#' \
             android/gradle/wrapper/gradle-wrapper.properties
 
           test -f android/gradlew
+          test -f android/gradlew.bat
           test -f android/gradle/wrapper/gradle-wrapper.jar
 
-      - name: Build release APK
-        run: flutter build apk --release
+          echo "Gradle wrapper:"
+          grep distributionUrl android/gradle/wrapper/gradle-wrapper.properties
 
-      - name: Check APK
+      # --------------------------------------------------
+      # 7. Verify Gradle
+      # --------------------------------------------------
+      - name: Check Gradle version
+        working-directory: android
+        run: |
+          ./gradlew --version
+
+      # --------------------------------------------------
+      # 8. Build APK
+      # --------------------------------------------------
+      - name: Build release APK
+        run: |
+          flutter clean
+          flutter pub get
+          flutter build apk --release
+
+      # --------------------------------------------------
+      # 9. Verify APK
+      # --------------------------------------------------
+      - name: Verify APK
         run: |
           test -f build/app/outputs/flutter-apk/app-release.apk
           ls -lh build/app/outputs/flutter-apk/app-release.apk
 
+      # --------------------------------------------------
+      # 10. Upload APK
+      # --------------------------------------------------
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
