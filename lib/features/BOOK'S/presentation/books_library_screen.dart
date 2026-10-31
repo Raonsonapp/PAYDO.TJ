@@ -12,6 +12,7 @@ class BooksLibraryScreen extends StatelessWidget {
       withData: false,
     );
     if (!context.mounted || result == null) return;
+
     final path = result.files.single.path;
     if (path == null) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -19,6 +20,7 @@ class BooksLibraryScreen extends StatelessWidget {
       );
       return;
     }
+
     Navigator.of(context).push(MaterialPageRoute(
       builder: (_) => PdfBookViewer(title: title, path: path),
     ));
@@ -26,63 +28,56 @@ class BooksLibraryScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text("BOOK'S")),
-    body: ListView(
-      padding: const EdgeInsets.all(16),
-      children: [
-        const Text('Маҷмӯи китобҳо',
-          style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold)),
-        const SizedBox(height: 6),
-        const Text('Китобҳои гуногун дар як китобхонаи рақамӣ.'),
-        const SizedBox(height: 18),
-        Card(
-          child: ListTile(
-            leading: const CircleAvatar(child: Icon(Icons.menu_book)),
-            title: const Text('Фарҳангшиносӣ'),
-            subtitle: const Text('PDF-ро аз телефон интихоб кунед'),
-            trailing: const Icon(Icons.chevron_right),
-            onTap: () => _pickAndOpen(context, 'Фарҳангшиносӣ'),
-          ),
-        ),
-        Card(
-          child: ListTile(
-            leading: const CircleAvatar(child: Icon(Icons.code)),
-            title: const Text('Python Crash Course'),
-            subtitle: const Text('Eric Matthes • Нашри сеюм • PDF'),
-            trailing: const Icon(Icons.picture_as_pdf_outlined),
-            onTap: () => _pickAndOpen(context, 'Python Crash Course'),
-          ),
-        ),
-        const SizedBox(height: 12),
-        const Card(
-          child: Padding(
-            padding: EdgeInsets.all(16),
-            child: Text(
-              'Ҳар китобро бо интихоби PDF аз хотираи телефон кушоед. '
-              'Барои дохил кардани PDF ба худи APK, файли аслиро ба ҷузвдони '
-              'assets-и китоб дар GitHub илова кардан лозим аст.',
+        appBar: AppBar(title: const Text("BOOK'S")),
+        body: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            const Text(
+              'Маҷмӯи китобҳо',
+              style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
             ),
-          ),
+            const SizedBox(height: 6),
+            const Text('Китобҳои барномасозӣ ва омӯзишӣ.'),
+            const SizedBox(height: 18),
+            Card(
+              child: ListTile(
+                leading: const CircleAvatar(child: Icon(Icons.code_rounded)),
+                title: const Text('Python Crash Course'),
+                subtitle: const Text('Eric Matthes • 3rd Edition • PDF'),
+                trailing: const Icon(Icons.menu_book_rounded),
+                onTap: () => _pickAndOpen(context, 'Python Crash Course'),
+              ),
+            ),
+            const Card(
+              child: Padding(
+                padding: EdgeInsets.all(16),
+                child: Text(
+                  'Барои хондан тугмаи китобро пахш кунед ва PDF-и '
+                  'Python Crash Course-ро аз телефони худ интихоб намоед. '
+                  'Нусхаи PDF ба таври худкор ба APK дохил карда нашудааст.',
+                ),
+              ),
+            ),
+          ],
         ),
-      ],
-    ),
-  );
+      );
 }
 
 class PdfBookViewer extends StatelessWidget {
   const PdfBookViewer({super.key, required this.title, required this.path});
+
   final String title;
   final String path;
 
   @override
   Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: Text(title)),
-    body: PDFView(
-      filePath: path,
-      enableSwipe: true,
-      swipeHorizontal: false,
-      autoSpacing: true,
-      pageFling: true,
-    ),
-  );
+        appBar: AppBar(title: Text(title)),
+        body: PDFView(
+          filePath: path,
+          enableSwipe: true,
+          swipeHorizontal: false,
+          autoSpacing: true,
+          pageFling: true,
+        ),
+      );
 }
